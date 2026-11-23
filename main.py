@@ -60,6 +60,12 @@ def on_batch(state, batch):
     if bar is None:
         return []
     close = int(bar["c"])
+    if close <= 0:
+        # Prices are positive integers; a zero or negative close is bad
+        # data, not a market move. Skipping the bar keeps it out of the
+        # lookback -- a zero there would crash _return_bps with a
+        # ZeroDivisionError 121 bars later -- and avoids trading on it.
+        return []
     closes.append(close)
     if len(closes) <= LOOKBACK_BARS:
         return []
